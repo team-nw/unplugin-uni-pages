@@ -1,8 +1,11 @@
 import type { PagesConfig } from '../types'
 
 import type { TabBarItem } from '../types/tabBar'
+import { existsSync, readFileSync } from 'node:fs'
+
 import { join } from 'node:path'
 import { normalizePath } from 'vite'
+import { writeFile } from './util'
 
 export function getDeclaration(config: PagesConfig) {
   const subPagesPath = (config.subPackages || []).map((sub) => {
@@ -38,12 +41,11 @@ declare interface Uni {
 }
 
 export async function writeDeclaration(config: PagesConfig, filepath: string) {
-  // const originalContent = existsSync(filepath) ? await readFile(filepath, 'utf-8') : ''
-
+  const originalContent = existsSync(filepath) ? readFileSync(filepath) as any : ''
   const code = getDeclaration(config)
   if (!code)
     return
 
-  // if (code !== originalContent)
-  //   await writeFile(filepath, code)
+  if (code !== originalContent)
+    await writeFile(filepath, code)
 }

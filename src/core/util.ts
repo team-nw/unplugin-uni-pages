@@ -35,6 +35,7 @@ export async function exec<R = any>(file: string, exp: babelTypes.Expression, im
 /**
  * 执行 TypeScript 代码字符串并返回其返回值
  * @param code - TypeScript 代码字符串
+ * @param filename
  * @returns 返回值
  */
 async function executeTypeScriptCode(code: string, filename: string): Promise<any> {

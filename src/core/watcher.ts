@@ -43,7 +43,6 @@ export class Watcher<T> {
     for (const filePatternsItem of filePatterns) {
       newPatterns.push(`${slash(filePatternsItem)}`)
     }
-    console.log('filePatterns', newPatterns, root)
     this.filePatterns = newPatterns
     this.exclude = exclude
     this.t = t
