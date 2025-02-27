@@ -1,0 +1,16 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "composite": true,
+    "moduleResolution": "Bundler",
+    "sourceMap": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@team-nw/unplugin-uni-pages": ["../src/index.ts"],
+    },
+    "lib": ["esnext", "dom"],
+    "types": ["@dcloudio/types"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue","../src","pages.json.ts"]
+}
