@@ -1,8 +1,8 @@
 {
   "name": "playground",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
+  "private": true,
   "scripts": {
     "dev:custom": "uni -p",
     "dev:h5": "uni",
