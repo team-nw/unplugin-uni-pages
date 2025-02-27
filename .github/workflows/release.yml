@@ -9,7 +9,6 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: write
     steps:
       - uses: actions/checkout@v3
@@ -26,6 +25,9 @@ jobs:
   publish-npm:
     needs: release
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
