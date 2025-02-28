@@ -1,21 +1,81 @@
 import type {
-  CallExpression,
-  Node,
+  Program,
 } from '@babel/types'
-import type * as babelTypes from '@babel/types'
+import type { SFCDescriptor, SFCParseResult, SFCScriptBlock as SFCScriptBlockMixed } from '@vue/compiler-sfc'
 import type { PageMetaOption } from '../types/page'
 import * as fs from 'node:fs'
 import path from 'node:path'
 import { slash } from '@antfu/utils'
 
-import { isCallOf, parseSFC } from '@vue-macros/common'
+import { parse } from '@vue/compiler-sfc'
+import { babelParse } from 'ast-kit'
 import debug from 'debug'
-import { exec } from './util'
+import { parseOption } from './define-page'
 
 const debugLog = debug('uni-pages:resolver')
 
 const MACRO_DEFINE_PAGE = 'definePage'
 export const MACRO_DEFINE_PAGE_QUERY = /[?&]definePage\b/
+
+export type SFCScriptBlock = Omit<
+  SFCScriptBlockMixed,
+    'scriptAst' | 'scriptSetupAst'
+>
+
+export type SFC = Omit<SFCDescriptor, 'script' | 'scriptSetup'> & {
+  sfc: SFCParseResult
+  script?: SFCScriptBlock | null
+  scriptSetup?: SFCScriptBlock | null
+  lang: string | undefined
+  getScriptAst: () => Program | undefined
+  getSetupAst: () => Program | undefined
+  offset: number
+} & Pick<SFCParseResult, 'errors'>
+
+export function parseSFC(code: string, id: string): SFC {
+  const sfc = parse(code, {
+    filename: id,
+  })
+  const { descriptor, errors } = sfc
+
+  const scriptLang = sfc.descriptor.script?.lang
+  const scriptSetupLang = sfc.descriptor.scriptSetup?.lang
+
+  if (
+    sfc.descriptor.script
+    && sfc.descriptor.scriptSetup
+    && (scriptLang || 'js') !== (scriptSetupLang || 'js')
+  ) {
+    throw new Error(
+      `[unplugin-vue-macros] <script> and <script setup> must have the same language type.`,
+    )
+  }
+
+  const lang = scriptLang || scriptSetupLang
+
+  return Object.assign({}, descriptor, {
+    sfc,
+    lang,
+    errors,
+    offset: descriptor.scriptSetup?.loc.start.offset ?? 0,
+    getSetupAst() {
+      if (!descriptor.scriptSetup)
+        return
+      return babelParse(descriptor.scriptSetup.content, lang, {
+        plugins: [['importAttributes', { deprecatedAssertSyntax: true }]],
+        cache: true,
+      })
+    },
+    getScriptAst() {
+      if (!descriptor.script)
+        return
+      return babelParse(descriptor.script.content, lang, {
+        plugins: [['importAttributes', { deprecatedAssertSyntax: true }]],
+        cache: true,
+      })
+    },
+  } satisfies Partial<SFC>)
+}
 
 export class PageMeta {
   readonly abstractPath: string
@@ -38,48 +98,31 @@ export class PageMeta {
     }
     if (content.includes(MACRO_DEFINE_PAGE)) {
       const sfc = parseSFC(content, contentPath)
-
-      const { getSetupAst } = sfc
-      const setupAst = getSetupAst()
-      const definePageNodes = (setupAst?.body ?? ([] as Node[]))
-        .map((node) => {
-          if (node.type === 'ExpressionStatement')
-            node = node.expression
-          return isCallOf(node, MACRO_DEFINE_PAGE) ? node : null
-        })
-        .filter((node): node is CallExpression => !!node)
-      const imports = (setupAst?.body ?? ([] as Node[])).map((node: babelTypes.Node) => (node.type === 'ImportDeclaration') ? node : undefined).filter((node): node is babelTypes.ImportDeclaration => !!node)
-      if (!definePageNodes.length) {
-        return pageMeatOption
-      }
-      else if (definePageNodes.length > 1) {
-        throw new SyntaxError(`duplicate definePage() call`)
-      }
-      const definePageNode = definePageNodes[0]!
-      const [arg] = definePageNode.arguments as [babelTypes.Expression]
-      if (!arg) {
-        return pageMeatOption
-      }
-      const newOption: PageMetaOption | undefined = await exec<PageMetaOption>(contentPath, arg, imports)
-      const resultOption = { ...newOption, ...pageMeatOption }
-      debugLog('contentToOption result', resultOption)
-      return resultOption
+      const newOption = await parseOption(sfc, contentPath)
+      return { ...newOption, ...pageMeatOption }
     }
     return pageMeatOption
   }
 
   async isUpdated() {
     const content = fs.readFileSync(this.abstractPath, 'utf-8')
-    const newOption = await this.contentToOption(this.abstractPath, content)
-    const raw = JSON.stringify(newOption, null, 2)
-    if (raw === this.cacheRaw) {
-      return false
+    try {
+      const newOption = await this.contentToOption(this.abstractPath, content)
+      const raw = JSON.stringify(newOption, null, 2)
+      if (raw === this.cacheRaw) {
+        return false
+      }
+      else {
+        debugLog(`PageMeta hasUpdated ${this.abstractPath}`)
+        this.cacheRaw = raw
+        this.option = newOption
+        return true
+      }
     }
-    else {
-      debugLog(`PageMeta hasUpdated ${this.abstractPath}`)
-      this.cacheRaw = raw
-      this.option = newOption
-      return true
+    catch (e) {
+      // 编辑过程中出现错误语法  跳过按未更新
+      debugLog(`PageMeta hasUpdated error ${this.abstractPath}`, e)
+      return false
     }
   }
 
