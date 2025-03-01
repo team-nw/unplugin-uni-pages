@@ -5,23 +5,39 @@ import { createUnplugin } from 'unplugin'
 import { createContext } from './core/context'
 import { definePageTransform } from './core/define-page'
 
+const virtualModelName = 'virtual:uni-pages'
+
 export const unpluginFactory: UnpluginFactory<Options | undefined> = (options) => {
   const ctx = createContext(options)
-  let init = false
+  ctx.initCtx()
   return {
-    name: 'unplugin-starter',
+    name: 'unplugin-uni-pages',
     enforce: 'pre',
-    async buildStart() {
-      if (!init) {
-        init = true
-        await ctx.initCtx()
-      }
-    },
     transformInclude(id) {
       return id.endsWith('vue')
     },
+    resolveId(id) {
+      if (id === virtualModelName) {
+        return virtualModelName
+      }
+      else {
+        return undefined
+      }
+    },
     transform(code, id) {
       return definePageTransform({ code, id })
+    },
+    loadInclude(id) {
+      if (id === virtualModelName) {
+        return true
+      }
+      return undefined
+    },
+    load(id) {
+      if (id === virtualModelName) {
+        return ctx.virtualModule()
+      }
+      return undefined
     },
   }
 }

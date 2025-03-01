@@ -13,6 +13,8 @@ import { Watcher } from './watcher'
 
 const debugLog = debug('uni-pages:context')
 
+export const OUTPUT_NAME = 'pages.json'
+
 export function createContext(options: Options | undefined) {
   if (options && options.enableLog) {
     enableLog()
@@ -25,6 +27,8 @@ export function createContext(options: Options | undefined) {
   const pageMetas = new Map<string, PageMeta>()
 
   const subPackageMetas = new Map<string, Map<string, PageMeta>>()
+
+  let latestConfigStr: string | undefined
 
   function setupPageWatcher(watcher: Watcher<PageOption | SubPageOption>) {
     debugLog(`🤖 Scanning files in ${watcher.root} ${watcher.filePatterns} ${typeof watcher.filePatterns}`)
@@ -126,13 +130,14 @@ export function createContext(options: Options | undefined) {
     if (dts) {
       writeDeclaration(config, dts)
     }
-    const pathConfigPath = path.resolve(root, basePath, 'pages.json')
+    const pathConfigPath = path.resolve(root, basePath, OUTPUT_NAME)
     debugLog(`🤖 GenerateConfig Write ${pathConfigPath}`)
-    await writeFile(pathConfigPath, JSON.stringify(config, null, 2))
+    latestConfigStr = JSON.stringify(config)
+    await writeFile(pathConfigPath, latestConfigStr)
     debugLog(`🤖 GenerateConfig Result ${JSON.stringify(config, null, 2)}`)
   }
   async function initCtx() {
-    debugLog('enableLog SUCCESS111', readyStatus)
+    debugLog('EnableLog SUCCESS', readyStatus)
     debugLog(`🤖 InitCtx start ${JSON.stringify({ pages, subPackage })}`)
 
     const { sources } = await loadConfig<PagesConfig>({ cwd: process.cwd(), sources: configSource, defaults: {} })
@@ -157,7 +162,12 @@ export function createContext(options: Options | undefined) {
     generateConfig()
   }
 
+  function virtualModule() {
+    return `export default ${latestConfigStr};`
+  }
+
   return {
     initCtx,
+    virtualModule,
   }
 }

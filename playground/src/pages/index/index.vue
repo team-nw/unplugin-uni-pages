@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { definePage } from '@team-nw/unplugin-uni-pages/runtime'
 import { ref } from 'vue'
 
 const title = ref('__UNPLUGIN__')
