@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import pages from 'virtual:uni-pages'
 import { ref } from 'vue'
 
 const title = ref('__UNPLUGIN__')
 
 definePage({
   needLogin: false,
-  name: 'home122332882',
+  name: 'home121111',
 })
 </script>
 
@@ -16,6 +17,7 @@ definePage({
       <text class="title">
         {{ title }}
       </text>
+      {{ pages }}
     </view>
   </view>
 </template>

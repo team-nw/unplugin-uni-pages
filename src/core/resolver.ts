@@ -116,6 +116,7 @@ export class PageMeta {
         debugLog(`PageMeta hasUpdated ${this.abstractPath}`)
         this.cacheRaw = raw
         this.option = newOption
+
         return true
       }
     }

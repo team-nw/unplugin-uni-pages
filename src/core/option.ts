@@ -42,6 +42,7 @@ export function resolveOptions(options: Options | undefined) {
 
   for (const subItem of uniOptions.subPackage) {
     if (typeof subItem === 'string') {
+      debugLog('subItem', subItem)
       subArray.push({
         filePartten: subItem,
         exclude: [],
@@ -49,7 +50,8 @@ export function resolveOptions(options: Options | undefined) {
       })
     }
     else {
-      if (!subItem.root) {
+      debugLog('subItem.filePartten', subItem.filePartten)
+      if (!subItem.root && subItem.filePartten) {
         subItem.root = subItem.filePartten.split('*')[0] as string
       }
       subArray.push(subItem)

@@ -42,6 +42,10 @@ export function createContext(options: Options | undefined) {
           debugLog('change', JSON.stringify(ctx))
           updatePage(ctx)
         })
+        .on('unlink', async (ctx) => {
+          debugLog('delete', JSON.stringify(ctx))
+          deletePage(ctx)
+        })
         .on('ready', () => {
           debugLog(`🤖 Scanned ${watcher.root} ready`)
           resolve(watcher)
@@ -85,7 +89,21 @@ export function createContext(options: Options | undefined) {
     }
     if (pageMeta && await pageMeta.isUpdated()) {
       // 重新生成
+      await generateConfig()
     }
+  }
+
+  async function deletePage(handlerContext: HandlerContext<PageOption | SubPageOption>) {
+    const { filePath, t } = handlerContext
+    debugLog(`🤖 Update page ${filePath} ${t}`)
+    const { root } = t as SubPageOption
+    if (root) {
+      subPackageMetas.get(root)?.delete(filePath)
+    }
+    else {
+      pageMetas.delete(filePath)
+    }
+    await generateConfig()
   }
 
   async function resolveOption(mapValues: Map<string, PageMeta>) {
@@ -163,6 +181,7 @@ export function createContext(options: Options | undefined) {
   }
 
   function virtualModule() {
+    debugLog(`🤖 VirtualModule`)
     return `export default ${latestConfigStr};`
   }
 

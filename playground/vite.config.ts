@@ -1,7 +1,7 @@
 import * as path from 'node:path'
 import uni from '@dcloudio/vite-plugin-uni'
-import Unplugin from '@team-nw/unplugin-uni-pages/vite'
 import { defineConfig } from 'vite'
+import Unplugin from '../src/vite'
 
 console.log(`${path.resolve(__dirname, '../src/index.ts')}`)
 // https://vitejs.dev/config/
