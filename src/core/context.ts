@@ -132,9 +132,9 @@ export function createContext(options: Options | undefined) {
     }
     const pathConfigPath = path.resolve(root, basePath, OUTPUT_NAME)
     debugLog(`🤖 GenerateConfig Write ${pathConfigPath}`)
-    latestConfigStr = JSON.stringify(config)
+    latestConfigStr = JSON.stringify(config, null, 2)
     await writeFile(pathConfigPath, latestConfigStr)
-    debugLog(`🤖 GenerateConfig Result ${JSON.stringify(config, null, 2)}`)
+    debugLog(`🤖 GenerateConfig Result ${latestConfigStr}`)
   }
   async function initCtx() {
     debugLog('EnableLog SUCCESS', readyStatus)
