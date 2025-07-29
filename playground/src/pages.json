@@ -28,8 +28,18 @@
       "pages": [
         {
           "needLogin": false,
+          "name": "home",
+          "path": "index/index"
+        },
+        {
+          "needLogin": false,
           "type": "home",
           "path": "index/index1"
+        },
+        {
+          "needLogin": false,
+          "type": "home",
+          "path": "index/index2"
         }
       ]
     }
