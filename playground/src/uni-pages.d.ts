@@ -7,7 +7,9 @@ interface NavigateToOptions {
   url: "/pages/index/index" |
        "/pages/index/index1" |
        "/pages/index/index2" |
-       "/pages-sub/index/index1";
+       "/pages-sub/index/index" |
+       "/pages-sub/index/index1" |
+       "/pages-sub/index/index2";
 }
 interface RedirectToOptions extends NavigateToOptions {}
 
