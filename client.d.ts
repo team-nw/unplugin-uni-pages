@@ -1,10 +1,6 @@
-declare module 'virtual:uni-pages' {
-  import type { PagesConfig } from '@team-nw/unplugin-uni-pages/types'
-
-  const pages: PagesConfig
-  export default pages
-}
-export {}
+// Make the macros globally available
 declare global {
   const definePage: (typeof import('@team-nw/unplugin-uni-pages/runtime'))['definePage']
 }
+
+export {}

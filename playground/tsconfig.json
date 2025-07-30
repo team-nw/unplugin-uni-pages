@@ -17,6 +17,7 @@
     "resolveJsonModule": true,
     "types": [
       "@dcloudio/types",
+      "@team-nw/unplugin-uni-pages/virtual",
       "@team-nw/unplugin-uni-pages/client"
     ],
     "strict": true,

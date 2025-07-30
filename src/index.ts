@@ -49,3 +49,6 @@ export default unplugin
 export function defineUniPages(config: UserPagesConfig) {
   return config
 }
+
+export function definePage() {
+}
