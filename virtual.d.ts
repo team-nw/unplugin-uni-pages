@@ -4,4 +4,3 @@ declare module 'virtual:uni-pages' {
   const pages: PagesConfig
   export default pages
 }
-export {}
