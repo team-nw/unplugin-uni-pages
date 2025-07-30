@@ -1,14 +1,8 @@
 // Make the macros globally available
-
-import type { PageMetaOption } from '@team-nw/unplugin-uni-pages/types'
-
-interface DefinePage extends Partial<PageMetaOption> {}
-function definePage(props: DefinePage)
-
-type _definePage = typeof definePage
+import type { PageMeta } from '@team-nw/unplugin-uni-pages/types'
 
 declare global {
-  const definePage: _definePage
+  const definePage: (pageMeta: PageMeta) => any
 }
 
 export {}

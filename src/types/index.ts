@@ -7,6 +7,8 @@ import type { TabBar } from './tabBar'
 import type { TheWindow } from './theWindow'
 import type { UniIdRouter } from './uniIdRouter'
 
+export type PageMeta = Partial<PageMetaOption>
+
 export interface PageOption {
   filePartten: string
   exclude: string[]
